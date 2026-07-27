@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: phishguard-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/app/backend
+      - model-data:/app/model/save
+    environment:
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=cyberguard2026
+    restart: always
+
+  frontend-streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: phishguard-streamlit
+    command: streamlit run frontend/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend-api
+    environment:
+      - BACKEND_API_URL=http://backend-api:8000/api/v1
+    restart: always
+
+volumes:
+  db-data:
+  model-data:

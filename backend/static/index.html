@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard AI - AI Phishing Email Detector</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved brand-icon"></i>
+                <div class="brand-text">
+                    <h1>PHISHGUARD<span>AI</span></h1>
+                    <p>AI-Powered Email Security</p>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-view="analyzer">
+                    <i class="fa-solid fa-envelope-open-text"></i> Email Analyzer
+                </a>
+                <a href="#" class="nav-item" data-view="history">
+                    <i class="fa-solid fa-clock-rotate-left"></i> History
+                </a>
+                <a href="#" class="nav-item" data-view="reports">
+                    <i class="fa-solid fa-square-poll-vertical"></i> Reports
+                </a>
+                <a href="#" class="nav-item" data-view="url-scanner">
+                    <i class="fa-solid fa-link-slash"></i> URL Scanner
+                </a>
+                <a href="#" class="nav-item" data-view="threat-intel">
+                    <i class="fa-solid fa-bug"></i> Threat Intelligence
+                </a>
+                <a href="#" class="nav-item" data-view="settings">
+                    <i class="fa-solid fa-gears"></i> Settings
+                </a>
+                <a href="#" class="nav-item" data-view="admin">
+                    <i class="fa-solid fa-user-shield"></i> Admin Panel
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" class="logout-btn" id="logout-sidebar">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Header bar -->
+            <header class="top-header">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="global-search" placeholder="Search anything...">
+                </div>
+                <div class="header-actions">
+                    <div class="notifications">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="badge">3</span>
+                        <!-- Dropdown -->
+                        <div class="notification-dropdown">
+                            <h3>Security Notifications</h3>
+                            <ul>
+                                <li><i class="fa-solid fa-triangle-exclamation text-danger"></i> High threat email blocked from micros0ft-secure.cc</li>
+                                <li><i class="fa-solid fa-circle-check text-success"></i> DistilBERT model fine-tuned successfully</li>
+                                <li><i class="fa-solid fa-shield text-info"></i> Backup database successfully synced</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="user-profile">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" alt="Cyber Guardian" class="avatar">
+                        <div class="user-info">
+                            <span class="user-name">Cyber Guardian</span>
+                            <span class="user-role">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <section id="view-dashboard" class="content-view active">
+                <div class="dashboard-header">
+                    <h2>AI Phishing Email Detector</h2>
+                    <p>Detect. Analyze. Protect.</p>
+                </div>
+
+                <!-- Input Drag and Drop and Pasting area -->
+                <div class="upload-card">
+                    <div class="upload-zone" id="drop-zone">
+                        <div class="upload-shield-graphic">
+                            <div class="pulse-shield">
+                                <i class="fa-solid fa-envelope-open-text"></i>
+                            </div>
+                            <div class="shield-border"></div>
+                        </div>
+                        <div class="upload-text">
+                            <h3>Drag & drop your email file here</h3>
+                            <p>Supports .eml, .txt, and .msg files</p>
+                            <span class="or-separator">or</span>
+                            <div class="upload-buttons">
+                                <label for="file-upload" class="btn btn-secondary">
+                                    <i class="fa-solid fa-file-import"></i> Choose File
+                                    <input type="file" id="file-upload" accept=".txt,.eml,.msg" style="display:none">
+                                </label>
+                                <button class="btn btn-primary" id="btn-paste-email">
+                                    <i class="fa-solid fa-paste"></i> Paste Email Text
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pasting Modal -->
+                <div class="modal" id="paste-modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Paste Email Text</h3>
+                            <button class="close-modal" id="close-paste-modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <textarea id="paste-area" placeholder="Paste the subject and body of the suspicious email here..."></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" id="btn-cancel-paste">Cancel</button>
+                            <button class="btn btn-primary" id="btn-analyze-pasted">Analyze Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Summary Cards (initially hidden until scanned) -->
+                <div class="results-container" id="analysis-results" style="display: none;">
+                    <div class="metrics-grid">
+                        <div class="metric-card" id="card-prediction">
+                            <div class="card-icon"><i class="fa-solid fa-circle-radiation"></i></div>
+                            <div class="card-info">
+                                <h4>Prediction</h4>
+                                <span class="value text-danger" id="result-prediction-label">PHISHING</span>
+                                <span class="subtext" id="result-risk-classification">High Risk</span>
+                            </div>
+                        </div>
+                        <div class="metric-card" id="card-confidence">
+                            <div class="card-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                            <div class="card-info">
+                                <h4>Confidence Score</h4>
+                                <span class="value" id="result-confidence-val">98.72%</span>
+                                <div class="mini-sparkline">
+                                    <canvas id="confidenceSparkline" height="25"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="metric-card" id="card-threat-score">
+                            <div class="card-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="card-info">
+                                <h4>Threat Score</h4>
+                                <span class="value"><span id="result-threat-val">92</span><span class="max-val">/100</span></span>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar progress-red" id="result-threat-progress" style="width: 92%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="metric-card" id="card-risk-level">
+                            <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div class="card-info">
+                                <h4>Risk Level</h4>
+                                <span class="value text-danger" id="result-risk-level-val">DANGER</span>
+                                <span class="subtext">Take Action</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Row -->
+                    <div class="details-grid">
+                        <!-- Column 1: Email Metadata -->
+                        <div class="details-card">
+                            <h3>Email Analysis</h3>
+                            <div class="meta-list">
+                                <div class="meta-item">
+                                    <span class="label">From</span>
+                                    <span class="value text-danger highlight-meta" id="meta-from">support@micros0ft-secure.com</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="label">To</span>
+                                    <span class="value" id="meta-to">user@example.com</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="label">Subject</span>
+                                    <span class="value text-white font-weight-bold" id="meta-subject">Urgent: Verify Your Account Now</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="label">Email Length</span>
+                                    <span class="value" id="meta-length">1,245 characters</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="label">Links</span>
+                                    <span class="value badge-count badge-red" id="meta-links-count">3</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="label">Attachments</span>
+                                    <span class="value badge-count badge-yellow" id="meta-attachments-count">1</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="label">Sent Time</span>
+                                    <span class="value" id="meta-time">May 21, 2026 10:42 AM</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="label">Email ID</span>
+                                    <span class="value text-muted" id="meta-id">&lt;8734f...@micros0ft-secure.com&gt;</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-danger btn-full" id="btn-view-headers">
+                                <i class="fa-solid fa-list-check"></i> View Full Header Analysis
+                            </button>
+                        </div>
+
+                        <!-- Column 2: Why Phishing + Threat Gauge -->
+                        <div class="details-card">
+                            <h3>Why This Email is Phishing?</h3>
+                            <div class="why-split">
+                                <div class="why-reasons">
+                                    <ul class="reasons-list" id="explain-reasons-list">
+                                        <li><i class="fa-solid fa-circle-exclamation text-danger"></i> The email creates a sense of urgency.</li>
+                                        <li><i class="fa-solid fa-circle-exclamation text-danger"></i> Contains suspicious link to an external site.</li>
+                                        <li><i class="fa-solid fa-circle-exclamation text-danger"></i> The domain 'micros0ft-secure.com' is not a legitimate Microsoft domain.</li>
+                                        <li><i class="fa-solid fa-circle-exclamation text-danger"></i> Asks for sensitive credentials.</li>
+                                    </ul>
+                                </div>
+                                <div class="gauge-container">
+                                    <div class="radial-gauge">
+                                        <svg viewBox="0 0 100 100">
+                                            <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
+                                            <circle class="gauge-fill fill-red" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="20.1" id="radial-gauge-circle"></circle>
+                                        </svg>
+                                        <div class="gauge-text">
+                                            <span class="percent" id="radial-gauge-val">92%</span>
+                                            <span class="lbl">Threat Score</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-secondary" id="btn-download-pdf-report"><i class="fa-solid fa-file-pdf"></i> View Full Report</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom row detailed cards -->
+                    <div class="bottom-grid">
+                        <!-- Keyphrase tags -->
+                        <div class="bottom-card flex-25">
+                            <h3>Keyword Analysis</h3>
+                            <div class="tags-container" id="keyword-tags">
+                                <span class="tag tag-red">urgent</span>
+                                <span class="tag tag-red">verify</span>
+                                <span class="tag tag-red">account</span>
+                                <span class="tag tag-red">password</span>
+                                <span class="tag tag-red">immediately</span>
+                                <span class="tag tag-red">click here</span>
+                            </div>
+                        </div>
+
+                        <!-- Donut prediction distribution -->
+                        <div class="bottom-card flex-25">
+                            <h3>Category Prediction</h3>
+                            <div class="chart-box">
+                                <canvas id="categoryDonutChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Top detected risks -->
+                        <div class="bottom-card flex-25">
+                            <h3>Top Detected Risks</h3>
+                            <div class="risks-list" id="risk-bars-container">
+                                <div class="risk-bar-item">
+                                    <div class="risk-bar-info">
+                                        <span>Suspicious Link</span>
+                                        <span class="text-danger">95%</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar progress-red" style="width: 95%"></div>
+                                    </div>
+                                </div>
+                                <div class="risk-bar-item">
+                                    <div class="risk-bar-info">
+                                        <span>Urgency Detected</span>
+                                        <span class="text-danger">90%</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar progress-red" style="width: 90%"></div>
+                                    </div>
+                                </div>
+                                <div class="risk-bar-item">
+                                    <div class="risk-bar-info">
+                                        <span>Brand Impersonation</span>
+                                        <span class="text-danger">85%</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar progress-red" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations & Language -->
+                        <div class="bottom-card flex-25">
+                            <h3>Recommendations</h3>
+                            <div class="recommendations-box">
+                                <ul class="reasons-list" id="recommendation-list">
+                                    <li><i class="fa-solid fa-circle-xmark text-danger"></i> Delete email immediately</li>
+                                    <li><i class="fa-solid fa-circle-xmark text-danger"></i> Do not click links</li>
+                                    <li><i class="fa-solid fa-circle-xmark text-danger"></i> Report to security team</li>
+                                </ul>
+                            </div>
+                            <div class="language-indicator">
+                                <div class="lang-globe">
+                                    <i class="fa-solid fa-earth-americas"></i>
+                                    <span>Language: <strong>English (EN)</strong></span>
+                                </div>
+                                <div class="model-badge">
+                                    <i class="fa-solid fa-brain"></i> <span id="lbl-model-used">DistilBERT Model</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Email Analyzer Tab View -->
+            <section id="view-analyzer" class="content-view">
+                <div class="dashboard-header">
+                    <h2>Advanced Email Scanner</h2>
+                    <p>Input raw email details and fetch granular explainability indicators.</p>
+                </div>
+                
+                <div class="analyzer-workspace">
+                    <div class="details-card">
+                        <h3>Email Source Input</h3>
+                        <div class="form-group">
+                            <label for="analyzer-subject">Subject Header (Optional)</label>
+                            <input type="text" id="analyzer-subject" class="form-input" placeholder="e.g. Action Required: Login verification">
+                        </div>
+                        <div class="form-group">
+                            <label for="analyzer-sender">Sender From Header (Optional)</label>
+                            <input type="text" id="analyzer-sender" class="form-input" placeholder="e.g. security@paypal-verification.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="analyzer-body">Email Body Text (Required)</label>
+                            <textarea id="analyzer-body" class="form-input text-area-large" placeholder="Paste the complete text content of the email here..."></textarea>
+                        </div>
+                        <div class="analyzer-actions">
+                            <button class="btn btn-secondary" id="btn-analyzer-clear">Clear Form</button>
+                            <button class="btn btn-primary" id="btn-analyzer-scan"><i class="fa-solid fa-fingerprint"></i> Scan Text</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History View -->
+            <section id="view-history" class="content-view">
+                <div class="dashboard-header">
+                    <h2>Prediction History Logs</h2>
+                    <p>Browse, inspect, and export past phishing scans.</p>
+                </div>
+                
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>Detection History Log</h3>
+                        <div class="export-buttons">
+                            <span>Export Logs:</span>
+                            <a href="/api/v1/history/export/csv" class="btn btn-outline" download><i class="fa-solid fa-file-csv"></i> CSV</a>
+                            <a href="/api/v1/history/export/json" class="btn btn-outline" download><i class="fa-solid fa-file-code"></i> JSON</a>
+                            <a href="/api/v1/history/export/pdf" class="btn btn-outline" download><i class="fa-solid fa-file-pdf"></i> PDF</a>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="data-table" id="history-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Timestamp</th>
+                                    <th>Sender</th>
+                                    <th>Subject</th>
+                                    <th>Category</th>
+                                    <th>Risk Score</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- Loaded dynamically via JS -->
+                                <tr>
+                                    <td colspan="7" class="text-center">Loading scan logs database...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports/Analytics View -->
+            <section id="view-reports" class="content-view">
+                <div class="dashboard-header">
+                    <h2>Reports & Analytics Dashboard</h2>
+                    <p>Track prediction speeds, weekly distribution volume, and classification accuracy curves.</p>
+                </div>
+                
+                <div class="analytics-grid">
+                    <div class="analytics-card flex-50">
+                        <h3>Weekly Detection Volume</h3>
+                        <div class="chart-large">
+                            <canvas id="weeklyTimelineChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card flex-50">
+                        <h3>Threat Distribution Trend</h3>
+                        <div class="chart-large">
+                            <canvas id="threatDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-grid margin-top-20">
+                    <div class="analytics-card flex-50">
+                        <h3>ROC Evaluation Curve (Model Comparison)</h3>
+                        <div class="chart-large">
+                            <canvas id="rocCurveChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card flex-50">
+                        <h3>Threat Intensity Distribution</h3>
+                        <div class="chart-large">
+                            <canvas id="threatIntensityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- URL Scanner View -->
+            <section id="view-url-scanner" class="content-view">
+                <div class="dashboard-header">
+                    <h2>Cybersecurity URL Scanner</h2>
+                    <p>Check individual links for typosquatting, shorteners, punycode spoofing, or reputation issues.</p>
+                </div>
+                
+                <div class="analyzer-workspace">
+                    <div class="details-card">
+                        <h3>Suspicious Link Validator</h3>
+                        <div class="form-group">
+                            <label for="url-scan-input">URL Link Address</label>
+                            <div class="input-with-button">
+                                <input type="url" id="url-scan-input" class="form-input" placeholder="e.g. http://chase-security-update-lock.cc/login">
+                                <button class="btn btn-primary" id="btn-scan-single-url"><i class="fa-solid fa-link-slash"></i> Inspect URL</button>
+                            </div>
+                        </div>
+                        
+                        <div class="url-scan-results" id="url-results-box" style="display: none;">
+                            <div class="url-status-banner" id="url-status-banner">
+                                <i class="fa-solid fa-triangle-exclamation"></i> SUSPICIOUS LINK DETECTED
+                            </div>
+                            <div class="url-analysis-details">
+                                <div class="meta-item">
+                                    <span class="label">Evaluated Domain</span>
+                                    <span class="value text-white font-weight-bold" id="url-domain-name">chase-security-update-lock.cc</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="label">Triggered Warnings</span>
+                                    <span class="value text-danger" id="url-warnings-list">Brand Impersonation ('chase'), Typosquatted Top-level-domain (.cc)</span>
+                                </div>
+                                <div class="meta-item flex-col">
+                                    <span class="label">Threat Explanation</span>
+                                    <p class="value text-muted" style="margin-top: 5px;">
+                                        Phishing actors use look-alike domain extensions and brand keywords inside hostnames to trick recipients into revealing corporate and user credentials.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Threat Intel View -->
+            <section id="view-threat-intel" class="content-view">
+                <div class="dashboard-header">
+                    <h2>Threat Intelligence Database</h2>
+                    <p>Current active phishing tactics, brand indicators, and mitigation guidelines.</p>
+                </div>
+                
+                <div class="details-grid">
+                    <div class="details-card">
+                        <h3>Common Phishing Indicators</h3>
+                        <p class="text-muted">PhishGuard AI scans for these core social engineering markers during mail analysis:</p>
+                        <div class="threat-intel-list">
+                            <div class="intel-item">
+                                <span class="title"><i class="fa-solid fa-circle-exclamation text-danger"></i> Urgent Language</span>
+                                <span class="description">Requires immediate attention (e.g. "within 24 hours", "account freeze").</span>
+                            </div>
+                            <div class="intel-item">
+                                <span class="title"><i class="fa-solid fa-key text-danger"></i> Credential Harvesting</span>
+                                <span class="description">Requests passwords, PIN codes, security questions, or multi-factor tokens.</span>
+                            </div>
+                            <div class="intel-item">
+                                <span class="title"><i class="fa-solid fa-file-invoice-dollar text-danger"></i> Fake Invoices</span>
+                                <span class="description">Claims outstanding vendor balances or shipping fees (e.g. Quickbooks, FedEx).</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="details-card">
+                        <h3>URL Spoofing Typologies</h3>
+                        <p class="text-muted">Phishing emails rely heavily on technical tricks embedded inside links:</p>
+                        <div class="threat-intel-list">
+                            <div class="intel-item">
+                                <span class="title"><i class="fa-solid fa-signature text-danger"></i> IDN Homograph Attacks</span>
+                                <span class="description">Uses internationalized lookalike unicode characters to spoof valid domains (e.g. <code>аpple.com</code> using Cyrillic 'а').</span>
+                            </div>
+                            <div class="intel-item">
+                                <span class="title"><i class="fa-solid fa-scissors text-danger"></i> URL Shorteners</span>
+                                <span class="description">Hides final server redirections behind short links (e.g. <code>bit.ly</code>).</span>
+                            </div>
+                            <div class="intel-item">
+                                <span class="title"><i class="fa-solid fa-network-wired text-danger"></i> Typosquatting</span>
+                                <span class="description">Common spelling replacements like <code>micros0ft.com</code> or <code>paypal-security.net</code>.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="view-settings" class="content-view">
+                <div class="dashboard-header">
+                    <h2>System Configuration</h2>
+                    <p>Manage model sensitivity thresholds, security tokens, and network settings.</p>
+                </div>
+                
+                <div class="analyzer-workspace">
+                    <div class="details-card">
+                        <h3>Model Adjustments</h3>
+                        <div class="form-group">
+                            <label for="settings-threshold">Phishing Classification Cutoff Threshold: <strong id="val-settings-threshold">0.70</strong></label>
+                            <input type="range" id="settings-threshold" class="slider-input" min="0.5" max="0.95" step="0.05" value="0.70">
+                            <span class="text-muted text-small">Higher cutoff leads to higher Precision (fewer false positives) but lowers Recall.</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="settings-model-select">Primary ML Model Engine</label>
+                            <select id="settings-model-select" class="form-input">
+                                <option value="distilbert">DistilBERT Transformer (Deep Learning)</option>
+                                <option value="logistic_regression">TF-IDF + Logistic Regression (Fast Fallback)</option>
+                                <option value="heuristics">Cyber Heuristics Engine Only (Rules)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label><input type="checkbox" id="settings-cache-toggle" checked> Enable Prediction Local Memory Cache</label>
+                        </div>
+                        
+                        <div class="analyzer-actions">
+                            <button class="btn btn-primary" id="btn-save-settings"><i class="fa-solid fa-circle-check"></i> Save Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin Panel View -->
+            <section id="view-admin" class="content-view">
+                <div class="dashboard-header">
+                    <h2>Administrator Portal</h2>
+                    <p>Review system stats, clear log history, and inspect server health metrics.</p>
+                </div>
+
+                <!-- Login Container (if not logged in) -->
+                <div class="analyzer-workspace" id="admin-login-box">
+                    <div class="details-card login-card">
+                        <h3>Security Credentials Required</h3>
+                        <div id="admin-login-error" class="text-danger margin-bottom-10" style="display: none;">Invalid credentials. Session blocked.</div>
+                        <div class="form-group">
+                            <label for="admin-user">Administrator Username</label>
+                            <input type="text" id="admin-user" class="form-input" placeholder="Enter username">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-pass">Security Password</label>
+                            <input type="password" id="admin-pass" class="form-input" placeholder="Enter password">
+                        </div>
+                        <button class="btn btn-primary btn-full" id="btn-admin-login"><i class="fa-solid fa-lock-open"></i> Authenticate Session</button>
+                    </div>
+                </div>
+
+                <!-- Admin Dashboard (loaded if logged in) -->
+                <div id="admin-dashboard-box" style="display: none;">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="card-icon"><i class="fa-solid fa-database"></i></div>
+                            <div class="card-info">
+                                <h4>Database Logs</h4>
+                                <span class="value" id="admin-stat-db-records">0</span>
+                                <span class="subtext" id="admin-stat-db-size">0.00 KB size</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="card-icon"><i class="fa-solid fa-microchip"></i></div>
+                            <div class="card-info">
+                                <h4>CPU Load</h4>
+                                <span class="value" id="admin-stat-cpu">5.4%</span>
+                                <span class="subtext">Core Temperature Safe</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="card-icon"><i class="fa-solid fa-memory"></i></div>
+                            <div class="card-info">
+                                <h4>Memory Allocated</h4>
+                                <span class="value" id="admin-stat-memory">240 MB</span>
+                                <span class="subtext">Heap size within limits</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="card-icon"><i class="fa-solid fa-circle-nodes"></i></div>
+                            <div class="card-info">
+                                <h4>Model Footprint</h4>
+                                <span class="value" id="admin-stat-model-type">Logistic Reg.</span>
+                                <span class="subtext" id="admin-stat-model-size">1.2 MB on disk</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-card margin-top-20">
+                        <div class="table-header">
+                            <h3>Active System logs & Data Deletion</h3>
+                            <button class="btn btn-outline-danger" id="btn-clear-all-db"><i class="fa-solid fa-trash-can"></i> Flush All Database Logs</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Filename</th>
+                                        <th>Subject</th>
+                                        <th>Risk Score</th>
+                                        <th>Model Used</th>
+                                        <th>Admin Control</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-logs-tbody">
+                                    <tr>
+                                        <td colspan="6" class="text-center">No active logs fetched.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Custom scripts -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

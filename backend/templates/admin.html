@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard AI - Administrator Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            background: radial-gradient(ellipse at top, #1a0005 0%, #0a0a0a 60%);
+            display: flex; align-items: center; justify-content: center; min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        .admin-card {
+            width: 460px;
+            background: rgba(20,0,5,0.85);
+            border: 1px solid rgba(255,0,60,0.3);
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 0 60px rgba(255,0,60,0.12), 0 20px 40px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            animation: fadeInUp 0.5s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .brand-header { display: flex; align-items: center; gap: 14px; justify-content: center; margin-bottom: 8px; }
+        .brand-header i { font-size: 28px; color: #ff003c; filter: drop-shadow(0 0 8px #ff003c88); }
+        .brand-header h1 { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 2px; color: #fff; margin: 0; }
+        .brand-header h1 span { color: #ff003c; }
+        .subtitle { text-align: center; font-size: 12px; color: #888; margin-bottom: 28px; letter-spacing: 1px; text-transform: uppercase; }
+        .section-title { font-size: 11px; color: #ff003c; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,0,60,0.2); }
+        label { font-size: 12px; color: #aaa; font-weight: 500; display: block; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .form-group { margin-bottom: 16px; }
+        .form-input {
+            width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;
+            font-size: 14px; font-family: 'Inter', sans-serif; box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus { outline: none; border-color: rgba(255,0,60,0.5); box-shadow: 0 0 0 3px rgba(255,0,60,0.08); }
+        .form-input::placeholder { color: #555; }
+        .btn-primary {
+            width: 100%; padding: 12px; background: linear-gradient(135deg, #cc0028, #ff003c);
+            border: none; border-radius: 8px; color: #fff; font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 1px;
+            font-family: 'Inter', sans-serif; margin-bottom: 10px;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,0,60,0.4); }
+        .btn-outline {
+            width: 100%; padding: 11px; background: transparent;
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #aaa;
+            font-size: 13px; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .btn-outline:hover { border-color: rgba(255,0,60,0.4); color: #ff003c; }
+        .btn-warning {
+            width: 100%; padding: 12px; background: linear-gradient(135deg, #7a4800, #ff8c00);
+            border: none; border-radius: 8px; color: #fff; font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 1px;
+            font-family: 'Inter', sans-serif; margin-bottom: 10px;
+        }
+        .btn-warning:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,140,0,0.4); }
+        .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+        .alert-error { background: rgba(255,0,60,0.1); border: 1px solid rgba(255,0,60,0.3); color: #ff6680; }
+        .alert-success { background: rgba(0,200,80,0.1); border: 1px solid rgba(0,200,80,0.3); color: #00e676; }
+        .divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 24px 0; }
+        .warning-note { font-size: 11px; color: #666; text-align: center; margin-bottom: 20px; line-height: 1.6; }
+        #change-password-section { display: none; animation: fadeInUp 0.4s ease; }
+        .toggle-link { font-size: 12px; color: #ff003c; cursor: pointer; text-align: center; margin-top: 14px; display: block; text-decoration: underline; }
+        .logged-in-badge { display: none; background: rgba(0,200,80,0.1); border: 1px solid rgba(0,200,80,0.3); color: #00e676; padding: 8px 14px; border-radius: 8px; font-size: 12px; text-align: center; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <div class="admin-card">
+        <!-- Brand Header -->
+        <div class="brand-header">
+            <i class="fa-solid fa-user-shield"></i>
+            <h1>PHISHGUARD <span>ADMIN</span></h1>
+        </div>
+        <p class="subtitle">🔒 Secure Security Diagnostic Portal</p>
+
+        <!-- === LOGIN SECTION === -->
+        <div id="login-section">
+            <div class="section-title"><i class="fa-solid fa-key"></i> Authentication</div>
+            <p class="warning-note">This session is subject to network monitoring.<br>All unauthorized access attempts are logged.</p>
+
+            <div id="login-error" class="alert alert-error">
+                <i class="fa-solid fa-triangle-exclamation"></i> Invalid administrative credentials. Access denied.
+            </div>
+            <div id="logged-in-badge" class="logged-in-badge">
+                <i class="fa-solid fa-circle-check"></i> Authenticated — Admin session active
+            </div>
+
+            <div class="form-group">
+                <label for="usr"><i class="fa-solid fa-user"></i> Admin Username</label>
+                <input type="text" id="usr" class="form-input" placeholder="Enter username" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="pwd"><i class="fa-solid fa-lock"></i> Security Keyphrase</label>
+                <input type="password" id="pwd" class="form-input" placeholder="Enter password">
+            </div>
+
+            <button class="btn-primary" id="btn-login">
+                <i class="fa-solid fa-shield-halved"></i>&nbsp; Verify & Authenticate
+            </button>
+            <button class="btn-outline" onclick="window.location.href='/'">
+                <i class="fa-solid fa-arrow-left"></i>&nbsp; Return to Scan Dashboard
+            </button>
+
+            <span class="toggle-link" id="show-change-pwd" style="display:none;" onclick="showChangePassword()">
+                <i class="fa-solid fa-key"></i> Change Admin Password
+            </span>
+        </div>
+
+        <!-- === CHANGE PASSWORD SECTION === -->
+        <div id="change-password-section">
+            <div class="section-title"><i class="fa-solid fa-rotate"></i> Change Admin Password</div>
+
+            <div id="change-error" class="alert alert-error"></div>
+            <div id="change-success" class="alert alert-success"></div>
+
+            <div class="form-group">
+                <label for="current-pwd"><i class="fa-solid fa-lock"></i> Current Password</label>
+                <input type="password" id="current-pwd" class="form-input" placeholder="Enter current password">
+            </div>
+            <div class="form-group">
+                <label for="new-pwd"><i class="fa-solid fa-lock-open"></i> New Password <span style="color:#666">(min 8 chars)</span></label>
+                <input type="password" id="new-pwd" class="form-input" placeholder="Enter new password">
+            </div>
+            <div class="form-group">
+                <label for="confirm-pwd"><i class="fa-solid fa-check-double"></i> Confirm New Password</label>
+                <input type="password" id="confirm-pwd" class="form-input" placeholder="Confirm new password">
+            </div>
+
+            <button class="btn-warning" id="btn-change-pwd">
+                <i class="fa-solid fa-key"></i>&nbsp; Update Admin Password
+            </button>
+            <button class="btn-outline" onclick="showLogin()">
+                <i class="fa-solid fa-arrow-left"></i>&nbsp; Back to Login
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isAuthenticated = false;
+
+        // ── Login ────────────────────────────────────────────────────────────────
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const username = document.getElementById('usr').value.trim();
+            const password = document.getElementById('pwd').value;
+            const err = document.getElementById('login-error');
+            const badge = document.getElementById('logged-in-badge');
+            err.style.display = 'none';
+
+            if (!username || !password) {
+                err.textContent = '⚠ Please enter both username and password.';
+                err.style.display = 'block'; return;
+            }
+
+            try {
+                const res = await fetch('/api/v1/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!res.ok) throw new Error();
+
+                isAuthenticated = true;
+                badge.style.display = 'block';
+                document.getElementById('show-change-pwd').style.display = 'block';
+                document.getElementById('btn-login').innerHTML = '<i class="fa-solid fa-check"></i>&nbsp; Authenticated — Go to Dashboard';
+                document.getElementById('btn-login').onclick = () => { window.location.href = '/#admin'; };
+
+            } catch (e) {
+                err.textContent = '⚠ Invalid administrative credentials. Access denied.';
+                err.style.display = 'block';
+            }
+        });
+
+        // ── Toggle Views ─────────────────────────────────────────────────────────
+        function showChangePassword() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('change-password-section').style.display = 'block';
+            // Pre-fill current username
+            document.getElementById('current-pwd').value = '';
+            document.getElementById('new-pwd').value = '';
+            document.getElementById('confirm-pwd').value = '';
+        }
+
+        function showLogin() {
+            document.getElementById('change-password-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+        }
+
+        // ── Change Password ──────────────────────────────────────────────────────
+        document.getElementById('btn-change-pwd').addEventListener('click', async () => {
+            const username = document.getElementById('usr').value.trim() || 'admin';
+            const currentPwd  = document.getElementById('current-pwd').value;
+            const newPwd      = document.getElementById('new-pwd').value;
+            const confirmPwd  = document.getElementById('confirm-pwd').value;
+            const errEl  = document.getElementById('change-error');
+            const succEl = document.getElementById('change-success');
+
+            errEl.style.display = 'none';
+            succEl.style.display = 'none';
+
+            if (!currentPwd || !newPwd || !confirmPwd) {
+                errEl.textContent = '⚠ All fields are required.';
+                errEl.style.display = 'block'; return;
+            }
+            if (newPwd.length < 8) {
+                errEl.textContent = '⚠ New password must be at least 8 characters.';
+                errEl.style.display = 'block'; return;
+            }
+            if (newPwd !== confirmPwd) {
+                errEl.textContent = '⚠ New password and confirmation do not match.';
+                errEl.style.display = 'block'; return;
+            }
+
+            try {
+                const res = await fetch('/api/v1/admin/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        current_password: currentPwd,
+                        new_password: newPwd,
+                        confirm_password: confirmPwd
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Failed to change password.');
+
+                succEl.textContent = '✅ ' + data.message;
+                succEl.style.display = 'block';
+
+                // Clear fields
+                document.getElementById('current-pwd').value = '';
+                document.getElementById('new-pwd').value = '';
+                document.getElementById('confirm-pwd').value = '';
+
+            } catch (e) {
+                errEl.textContent = '⚠ ' + (e.message || 'An error occurred. Please try again.');
+                errEl.style.display = 'block';
+            }
+        });
+
+        // Allow Enter key to trigger login
+        ['usr', 'pwd'].forEach(id => {
+            document.getElementById(id).addEventListener('keydown', e => {
+                if (e.key === 'Enter') document.getElementById('btn-login').click();
+            });
+        });
+    </script>
+</body>
+</html>
